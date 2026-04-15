@@ -1,0 +1,9 @@
+node_modules/
+target/
+docker/
+specs/
+.vscode/
+.idea/
+*.log
+.env*
+coverage/

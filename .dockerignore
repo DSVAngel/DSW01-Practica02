@@ -1,0 +1,28 @@
+# Git
+.git/
+.gitignore
+
+# Build outputs
+target/
+build/
+
+# Local/editor
+.vscode/
+.idea/
+
+# Logs and env
+*.log
+.env
+.env.*
+
+# Node (if introduced later)
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# Docker files
+.dockerignore
+
+# Coverage artifacts
+coverage/

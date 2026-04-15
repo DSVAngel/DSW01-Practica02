@@ -1,0 +1,351 @@
+openapi: 3.0.3
+info:
+  title: API CRUD Departamentos Integrada con Empleados
+  version: 1.0.0
+  description: Contrato de endpoints para gestion de departamentos y su relacion con empleados.
+servers:
+  - url: http://localhost:8080
+security:
+  - basicAuth: []
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    DepartamentoBase:
+      type: object
+      required: [clave, nombre, descripcion]
+      properties:
+        clave:
+          type: string
+          minLength: 1
+          maxLength: 20
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          minLength: 1
+          maxLength: 100
+    EmpleadoResumen:
+      type: object
+      required: [clave, nombre]
+      properties:
+        clave:
+          type: string
+          minLength: 1
+          maxLength: 20
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+    DepartamentoResumen:
+      type: object
+      required: [clave, nombre]
+      properties:
+        clave:
+          type: string
+          minLength: 1
+          maxLength: 20
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+    DepartamentoResponse:
+      allOf:
+        - $ref: '#/components/schemas/DepartamentoBase'
+        - type: object
+          required: [empleados]
+          properties:
+            empleados:
+              type: array
+              items:
+                $ref: '#/components/schemas/EmpleadoResumen'
+    DepartamentoCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/DepartamentoBase'
+        - type: object
+          properties:
+            empleadosClaves:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
+                minLength: 1
+                maxLength: 20
+    DepartamentoPutRequest:
+      type: object
+      required: [nombre, descripcion, empleadosClaves]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        empleadosClaves:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 20
+    DepartamentoPatchRequest:
+      type: object
+      minProperties: 1
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        empleadosClaves:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 20
+    DepartamentoPageResponse:
+      type: object
+      required: [page, size, totalElements, totalPages, content]
+      properties:
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+          maximum: 50
+        totalElements:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepartamentoResponse'
+    EmpleadoResponse:
+      type: object
+      required: [clave, nombre, direccion, telefono]
+      properties:
+        clave:
+          type: string
+          minLength: 1
+          maxLength: 20
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        direccion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        telefono:
+          type: string
+          minLength: 1
+          maxLength: 100
+        departamento:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/DepartamentoResumen'
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+paths:
+  /api/departamentos:
+    post:
+      summary: Crear departamento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoCreateRequest'
+      responses:
+        '201':
+          description: Creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          description: Validacion invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Empleado asociado no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Clave duplicada de departamento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Listar departamentos
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - name: size
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Pagina de departamentos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoPageResponse'
+        '400':
+          description: Parametros de paginacion invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/departamentos/{clave}:
+    parameters:
+      - name: clave
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 20
+    get:
+      summary: Obtener departamento por clave
+      responses:
+        '200':
+          description: Departamento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Reemplazar departamento (actualizacion completa)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoPutRequest'
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          description: Validacion invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Departamento o empleado no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      summary: Actualizacion parcial de departamento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoPatchRequest'
+      responses:
+        '200':
+          description: Actualizado parcialmente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          description: Body invalido o sin campos actualizables
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Departamento o empleado no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Eliminar departamento
+      responses:
+        '204':
+          description: Eliminado
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Departamento con empleados asociados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/empleados/{clave}:
+    parameters:
+      - name: clave
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 20
+    get:
+      summary: Obtener empleado por clave incluyendo su departamento actual
+      responses:
+        '200':
+          description: Empleado encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
