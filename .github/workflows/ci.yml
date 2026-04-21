@@ -66,7 +66,6 @@ jobs:
     needs:
       - backend
       - frontend
-    if: ${{ secrets.SONAR_TOKEN != '' && vars.SONAR_PROJECT_KEY != '' && vars.SONAR_ORGANIZATION != '' }}
 
     steps:
       - name: Checkout
@@ -100,6 +99,7 @@ jobs:
         working-directory: frontend
 
       - name: SonarCloud scan (backend + frontend)
+        if: ${{ secrets.SONAR_TOKEN != '' && vars.SONAR_PROJECT_KEY != '' && vars.SONAR_ORGANIZATION != '' }}
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -117,6 +117,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/**/lcov.info
 
       - name: SonarCloud quality gate
+        if: ${{ secrets.SONAR_TOKEN != '' && vars.SONAR_PROJECT_KEY != '' && vars.SONAR_ORGANIZATION != '' }}
         uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
         timeout-minutes: 5
         env:
