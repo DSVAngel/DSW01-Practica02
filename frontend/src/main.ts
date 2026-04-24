@@ -1,32 +1,114 @@
 import { bootstrapApplication } from "@angular/platform-browser";
-import { Component } from "@angular/core";
+import { Component, Injectable, OnInit, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
+import { CanActivateFn, Router, RouterOutlet, Routes, provideRouter } from "@angular/router";
 import { Empleado, EmpleadosApiService } from "./app/core/api/empleados-api.service";
 import { Departamento, DepartamentosApiService } from "./app/core/api/departamentos-api.service";
 
+@Injectable({ providedIn: "root" })
+class AuthStateService {
+  username = "admin";
+  password = "admin123";
+  isAuthenticated = false;
+
+  setCredentials(username: string, password: string): void {
+    this.username = username;
+    this.password = password;
+  }
+
+  setAuthenticated(value: boolean): void {
+    this.isAuthenticated = value;
+  }
+
+  logout(): void {
+    this.isAuthenticated = false;
+  }
+}
+
+const panelGuard: CanActivateFn = () => {
+  const auth = inject(AuthStateService);
+  const router = inject(Router);
+  return auth.isAuthenticated ? true : router.createUrlTree(["/login"]);
+};
+
 @Component({
-  selector: "app-root",
+  selector: "app-login-page",
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <main class="shell login-shell">
+      <header class="hero">
+        <p class="eyebrow">DSW01 Practica02</p>
+        <h1>Iniciar sesión</h1>
+        <p class="hero-copy">Accede al panel con credenciales Basic válidas.</p>
+      </header>
+
+      <section class="card login-card">
+        <h2>Acceso</h2>
+        <div class="row">
+          <label>
+            Usuario
+            <input [(ngModel)]="username" placeholder="admin" />
+          </label>
+          <label>
+            Password
+            <input [(ngModel)]="password" type="password" placeholder="admin123" />
+          </label>
+          <button (click)="login()">Entrar</button>
+        </div>
+        <p class="message" *ngIf="message">{{ message }}</p>
+      </section>
+    </main>
+  `
+})
+class LoginPageComponent {
+  private readonly authState = inject(AuthStateService);
+  private readonly router = inject(Router);
+
+  username = this.authState.username;
+  password = this.authState.password;
+  message = "Usa tus credenciales para continuar.";
+
+  async login(): Promise<void> {
+    const empleadosApi = new EmpleadosApiService();
+    const departamentosApi = new DepartamentosApiService();
+
+    empleadosApi.setCredentials(this.username, this.password);
+    departamentosApi.setCredentials(this.username, this.password);
+
+    try {
+      await Promise.all([empleadosApi.list(0, 1), departamentosApi.list(0, 1)]);
+      this.authState.setCredentials(this.username, this.password);
+      this.authState.setAuthenticated(true);
+      this.message = "Sesión iniciada correctamente";
+      await this.router.navigate(["/panel"]);
+    } catch (error) {
+      this.authState.logout();
+      const detail = error instanceof Error ? error.message : "Error desconocido";
+      this.message = `No se pudo iniciar sesión: ${detail}`;
+    }
+  }
+}
+
+@Component({
+  selector: "app-dashboard-page",
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
     <main class="shell">
-      <h1>DSW01 Practica02 - Panel Operativo</h1>
+      <header class="hero">
+        <p class="eyebrow">DSW01 Practica02</p>
+        <h1>Panel Operativo</h1>
+        <p class="hero-copy">Gestiona empleados y departamentos.</p>
+      </header>
 
-      <section class="card">
-        <h2>Autenticacion Basic</h2>
-        <div class="row">
-          <label>
-            Usuario
-            <input [(ngModel)]="auth.username" placeholder="admin" />
-          </label>
-          <label>
-            Password
-            <input [(ngModel)]="auth.password" type="password" placeholder="admin123" />
-          </label>
-          <button (click)="applyCredentials()">Conectar</button>
-          <button class="secondary" (click)="clearCredentials()">Limpiar</button>
+      <section class="card session-bar">
+        <div>
+          <h2>Sesión activa</h2>
+          <p class="meta">Usuario: {{ authState.username || 'sin usuario' }}</p>
         </div>
+        <button class="secondary" (click)="logout()">Cerrar sesión</button>
       </section>
 
       <section class="grid-two">
@@ -45,6 +127,7 @@ import { Departamento, DepartamentosApiService } from "./app/core/api/departamen
             <li *ngFor="let e of empleados">
               <strong>{{ e.clave }}</strong> - {{ e.nombre }}
               <span class="meta">{{ e.direccion }} / {{ e.telefono }}</span>
+              <span class="meta">Versión: {{ e.version ?? 0 }}</span>
               <span class="meta" *ngIf="e.departamento">Depto: {{ e.departamento.nombre }} ({{ e.departamento.clave }})</span>
 
               <div class="row-wrap inline-controls">
@@ -86,6 +169,7 @@ import { Departamento, DepartamentosApiService } from "./app/core/api/departamen
             <li *ngFor="let d of departamentos">
               <strong>{{ d.clave }}</strong> - {{ d.nombre }}
               <span class="meta">{{ d.descripcion }}</span>
+              <span class="meta">Versión: {{ d.version ?? 0 }}</span>
               <span class="meta">Empleados: {{ d.empleados.length }}</span>
 
               <div class="row-wrap inline-controls">
@@ -106,14 +190,12 @@ import { Departamento, DepartamentosApiService } from "./app/core/api/departamen
     </main>
   `
 })
-class AppComponent {
+class DashboardPageComponent implements OnInit {
+  readonly authState = inject(AuthStateService);
+  private readonly router = inject(Router);
+
   private readonly empleadosApi = new EmpleadosApiService();
   private readonly departamentosApi = new DepartamentosApiService();
-
-  auth = {
-    username: "admin",
-    password: "admin123"
-  };
 
   empleadoForm = {
     clave: "",
@@ -135,24 +217,33 @@ class AppComponent {
   employeeEditDrafts: Record<string, { nombre: string; direccion: string; telefono: string } | undefined> = {};
   message = "";
 
-  async ngOnInit(): Promise<void> {
-    this.applyCredentials();
-    await this.refreshAll();
+  ngOnInit(): void {
+    if (!this.authState.isAuthenticated) {
+      this.router.navigate(["/login"]);
+      return;
+    }
+
+    this.empleadosApi.setCredentials(this.authState.username, this.authState.password);
+    this.departamentosApi.setCredentials(this.authState.username, this.authState.password);
+    this.refreshAll();
   }
 
-  applyCredentials(): void {
-    this.empleadosApi.setCredentials(this.auth.username, this.auth.password);
-    this.departamentosApi.setCredentials(this.auth.username, this.auth.password);
-    this.message = "Credenciales aplicadas";
-  }
-
-  clearCredentials(): void {
+  async logout(): Promise<void> {
+    this.authState.logout();
     this.empleadosApi.clearCredentials();
     this.departamentosApi.clearCredentials();
-    this.message = "Credenciales limpiadas";
+    this.empleados = [];
+    this.departamentos = [];
+    this.assignmentInputs = {};
+    this.employeeEditDrafts = {};
+    this.empleadoForm = { clave: "", nombre: "", direccion: "", telefono: "" };
+    this.departamentoForm = { clave: "", nombre: "", descripcion: "", empleadosClavesText: "" };
+    this.message = "Sesión cerrada";
+    await this.router.navigate(["/login"]);
   }
 
   async createEmpleado(): Promise<void> {
+    this.requireAuthenticated();
     try {
       await this.empleadosApi.create({
         clave: this.empleadoForm.clave.trim(),
@@ -169,6 +260,7 @@ class AppComponent {
   }
 
   async deleteEmpleado(clave: string): Promise<void> {
+    this.requireAuthenticated();
     try {
       await this.empleadosApi.delete(clave);
       await this.refreshAll();
@@ -180,6 +272,7 @@ class AppComponent {
   }
 
   async editEmpleado(empleado: Empleado): Promise<void> {
+    this.requireAuthenticated();
     try {
       const draft = this.employeeEditDrafts[empleado.clave] ?? {
         nombre: empleado.nombre,
@@ -211,17 +304,16 @@ class AppComponent {
   }
 
   async loadEmpleados(): Promise<void> {
+    this.requireAuthenticated();
     try {
       const page = await this.empleadosApi.list(0, 50);
       this.empleados = page.content;
       for (const empleado of this.empleados) {
-        if (!this.employeeEditDrafts[empleado.clave]) {
-          this.employeeEditDrafts[empleado.clave] = {
-            nombre: empleado.nombre,
-            direccion: empleado.direccion,
-            telefono: empleado.telefono
-          };
-        }
+        this.employeeEditDrafts[empleado.clave] ??= {
+          nombre: empleado.nombre,
+          direccion: empleado.direccion,
+          telefono: empleado.telefono
+        };
       }
     } catch (error) {
       this.handleError(error, "No se pudo listar empleados");
@@ -229,6 +321,7 @@ class AppComponent {
   }
 
   async createDepartamento(): Promise<void> {
+    this.requireAuthenticated();
     try {
       await this.departamentosApi.create({
         clave: this.departamentoForm.clave.trim(),
@@ -245,6 +338,7 @@ class AppComponent {
   }
 
   async assignToDepartamento(clave: string): Promise<void> {
+    this.requireAuthenticated();
     try {
       await this.departamentosApi.updatePatch(clave, {
         empleadosClaves: this.parseClaves(this.assignmentInputs[clave] ?? "")
@@ -257,6 +351,7 @@ class AppComponent {
   }
 
   async deleteDepartamento(clave: string): Promise<void> {
+    this.requireAuthenticated();
     try {
       await this.departamentosApi.delete(clave);
       await this.refreshAll();
@@ -267,13 +362,12 @@ class AppComponent {
   }
 
   async loadDepartamentos(): Promise<void> {
+    this.requireAuthenticated();
     try {
       const page = await this.departamentosApi.list(0, 50);
       this.departamentos = page.content;
       for (const departamento of this.departamentos) {
-        if (this.assignmentInputs[departamento.clave] === undefined) {
-          this.assignmentInputs[departamento.clave] = "";
-        }
+        this.assignmentInputs[departamento.clave] ??= "";
       }
     } catch (error) {
       this.handleError(error, "No se pudo listar departamentos");
@@ -282,6 +376,12 @@ class AppComponent {
 
   private async refreshAll(): Promise<void> {
     await Promise.all([this.loadEmpleados(), this.loadDepartamentos()]);
+  }
+
+  private requireAuthenticated(): void {
+    if (!this.authState.isAuthenticated) {
+      throw new Error("Debes iniciar sesión para acceder al panel");
+    }
   }
 
   private parseClaves(value: string): string[] {
@@ -305,4 +405,21 @@ class AppComponent {
   }
 }
 
-bootstrapApplication(AppComponent).catch((err) => console.error(err));
+@Component({
+  selector: "app-root",
+  standalone: true,
+  imports: [RouterOutlet],
+  template: `<router-outlet></router-outlet>`
+})
+class AppComponent {}
+
+const routes: Routes = [
+  { path: "login", component: LoginPageComponent },
+  { path: "panel", component: DashboardPageComponent, canActivate: [panelGuard] },
+  { path: "", pathMatch: "full", redirectTo: "login" },
+  { path: "**", redirectTo: "login" }
+];
+
+bootstrapApplication(AppComponent, {
+  providers: [provideRouter(routes)]
+}).catch((err) => console.error(err));

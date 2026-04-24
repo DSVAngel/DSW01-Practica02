@@ -8,6 +8,7 @@ export interface Departamento {
   nombre: string;
   descripcion: string;
   empleados: EmpleadoResumen[];
+  version?: number;
 }
 
 export interface DepartamentoPageResponse {
