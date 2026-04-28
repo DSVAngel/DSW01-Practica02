@@ -27,7 +27,7 @@ Configura tu `.env` con credenciales de Aiven:
 # .env
 DB_URL=jdbc:postgresql://pg-264ab7d8-danielangel-d392.b.aivencloud.com:28441/defaultdb?sslmode=require
 DB_USERNAME=avnadmin
-DB_PASSWORD=<your_aiven_password>
+DB_PASSWORD=
 ```
 
 ```bash
