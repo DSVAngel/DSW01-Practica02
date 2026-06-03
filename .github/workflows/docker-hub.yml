@@ -54,10 +54,6 @@ jobs:
           push: true
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
-          build-args: |
-            DB_URL=${{ secrets.AIVEN_DB_URL }}
-            DB_USERNAME=${{ secrets.AIVEN_DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.AIVEN_DB_PASSWORD }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/dsw-backend:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/dsw-backend:buildcache,mode=max
 
