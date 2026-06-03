@@ -36,7 +36,7 @@ class DepartamentoContractMutationIntegrationTest extends BasePostgresDepartamen
             "descripcion", "Control"
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
@@ -48,7 +48,7 @@ class DepartamentoContractMutationIntegrationTest extends BasePostgresDepartamen
             "empleadosClaves", List.of()
         ));
 
-        mockMvc.perform(put("/api/departamentos/{clave}", "DEPMUT001")
+        mockMvc.perform(put("/api/v1/departamentos/{clave}", "DEPMUT001")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(putBody))
@@ -58,13 +58,13 @@ class DepartamentoContractMutationIntegrationTest extends BasePostgresDepartamen
             "descripcion", "Compliance"
         ));
 
-        mockMvc.perform(patch("/api/departamentos/{clave}", "DEPMUT001")
+        mockMvc.perform(patch("/api/v1/departamentos/{clave}", "DEPMUT001")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchBody))
             .andExpect(status().isOk());
 
-        mockMvc.perform(delete("/api/departamentos/{clave}", "DEPMUT001")
+        mockMvc.perform(delete("/api/v1/departamentos/{clave}", "DEPMUT001")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isNoContent());
     }

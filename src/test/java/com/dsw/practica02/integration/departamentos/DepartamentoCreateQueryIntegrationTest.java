@@ -34,18 +34,18 @@ class DepartamentoCreateQueryIntegrationTest extends BasePostgresDepartamentoInt
             "descripcion", "TI"
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
             .andExpect(status().isCreated());
 
-        mockMvc.perform(get("/api/departamentos/{clave}", "DEPINT001")
+        mockMvc.perform(get("/api/v1/departamentos/{clave}", "DEPINT001")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.clave").value("DEPINT001"));
 
-        mockMvc.perform(get("/api/departamentos")
+        mockMvc.perform(get("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .param("page", "0")
                 .param("size", "10"))

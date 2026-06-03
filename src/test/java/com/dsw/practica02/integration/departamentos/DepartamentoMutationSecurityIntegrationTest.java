@@ -36,7 +36,7 @@ class DepartamentoMutationSecurityIntegrationTest extends BasePostgresDepartamen
             "descripcion", "Risk"
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
@@ -48,26 +48,26 @@ class DepartamentoMutationSecurityIntegrationTest extends BasePostgresDepartamen
             "empleadosClaves", List.of()
         ));
 
-        mockMvc.perform(put("/api/departamentos/{clave}", "DEPSEC900")
+        mockMvc.perform(put("/api/v1/departamentos/{clave}", "DEPSEC900")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(putBody))
             .andExpect(status().isUnauthorized());
 
-        mockMvc.perform(patch("/api/departamentos/{clave}", "DEPSEC900")
+        mockMvc.perform(patch("/api/v1/departamentos/{clave}", "DEPSEC900")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(Map.of("descripcion", "Riesgo"))))
             .andExpect(status().isUnauthorized());
 
-        mockMvc.perform(delete("/api/departamentos/{clave}", "DEPSEC900"))
+        mockMvc.perform(delete("/api/v1/departamentos/{clave}", "DEPSEC900"))
             .andExpect(status().isUnauthorized());
 
-        mockMvc.perform(put("/api/departamentos/{clave}", "DEPSEC900")
+        mockMvc.perform(put("/api/v1/departamentos/{clave}", "DEPSEC900")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(putBody))
             .andExpect(status().isOk());
 
-        mockMvc.perform(delete("/api/departamentos/{clave}", "DEPSEC900")
+        mockMvc.perform(delete("/api/v1/departamentos/{clave}", "DEPSEC900")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isNoContent());
     }

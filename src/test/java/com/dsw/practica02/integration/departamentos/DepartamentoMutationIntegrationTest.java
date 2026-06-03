@@ -37,7 +37,7 @@ class DepartamentoMutationIntegrationTest extends BasePostgresDepartamentoIntegr
             "telefono", "444"
         ));
 
-        mockMvc.perform(post("/api/empleados")
+        mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(empleadoBody))
@@ -50,13 +50,13 @@ class DepartamentoMutationIntegrationTest extends BasePostgresDepartamentoIntegr
             "empleadosClaves", List.of("EMPDEL001")
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
             .andExpect(status().isCreated());
 
-        mockMvc.perform(delete("/api/departamentos/{clave}", "DEPDEL001")
+        mockMvc.perform(delete("/api/v1/departamentos/{clave}", "DEPDEL001")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isConflict());
     }
@@ -69,7 +69,7 @@ class DepartamentoMutationIntegrationTest extends BasePostgresDepartamentoIntegr
             "descripcion", "QA"
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
@@ -81,20 +81,20 @@ class DepartamentoMutationIntegrationTest extends BasePostgresDepartamentoIntegr
             "empleadosClaves", List.of()
         ));
 
-        mockMvc.perform(put("/api/departamentos/{clave}", "DEPDEL002")
+        mockMvc.perform(put("/api/v1/departamentos/{clave}", "DEPDEL002")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(putBody))
             .andExpect(status().isOk());
 
         String emptyPatch = objectMapper.writeValueAsString(Map.of());
-        mockMvc.perform(patch("/api/departamentos/{clave}", "DEPDEL002")
+        mockMvc.perform(patch("/api/v1/departamentos/{clave}", "DEPDEL002")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(emptyPatch))
             .andExpect(status().isBadRequest());
 
-        mockMvc.perform(delete("/api/departamentos/{clave}", "DEPDEL002")
+        mockMvc.perform(delete("/api/v1/departamentos/{clave}", "DEPDEL002")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isNoContent());
     }

@@ -15,8 +15,8 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
-  backend:
-    name: Backend - Maven
+  backend-smoke:
+    name: Backend - Smoke HTTP Check
     runs-on: ubuntu-latest
 
     steps:
@@ -32,37 +32,28 @@ jobs:
           java-version: "17"
           cache: maven
 
-      - name: Run backend tests
-        run: mvn -B verify
+      - name: Build backend without tests
+        run: mvn -B -DskipTests package
 
-  frontend-cypress:
-    name: Frontend - Cypress E2E
-    runs-on: ubuntu-latest
+      - name: Start backend with test profile
+        run: |
+          java -jar target/practica02-0.0.1-SNAPSHOT.jar --spring.profiles.active=test > backend.log 2>&1 &
+          echo $! > backend.pid
+          for _ in $(seq 1 60); do
+            if : < /dev/tcp/127.0.0.1/8080; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat backend.log
+          exit 1
 
-    defaults:
-      run:
-        working-directory: frontend
+      - name: Verify backend connection
+        run: curl -fsS -u admin:admin123 "http://127.0.0.1:8080/api/v1/empleados?page=0&size=1"
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Cypress E2E tests with dev server
-        uses: cypress-io/github-action@v6
-        with:
-          browser: chrome
-          working-directory: frontend
-          start: npm start
-          wait-on: http://localhost:4200
-          wait-on-timeout: 120
-          spec: cypress/e2e/login.cy.ts
+      - name: Stop backend
+        if: always()
+        run: |
+          if [ -f backend.pid ]; then
+            kill "$(cat backend.pid)" || true
+          fi

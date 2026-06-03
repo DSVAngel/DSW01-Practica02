@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/departamentos")
+@RequestMapping("/api/v1/departamentos")
 @Validated
 public class DepartamentoController {
 

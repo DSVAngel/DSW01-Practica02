@@ -34,7 +34,7 @@ class DepartamentoContractCreateQueryIntegrationTest extends BasePostgresDeparta
             "descripcion", "Comercial"
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
@@ -44,7 +44,7 @@ class DepartamentoContractCreateQueryIntegrationTest extends BasePostgresDeparta
             .andExpect(jsonPath("$.descripcion").value("Comercial"))
             .andExpect(jsonPath("$.empleados").isArray());
 
-        mockMvc.perform(get("/api/departamentos/{clave}", "DEPCTR001")
+        mockMvc.perform(get("/api/v1/departamentos/{clave}", "DEPCTR001")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.clave").value("DEPCTR001"));
@@ -52,7 +52,7 @@ class DepartamentoContractCreateQueryIntegrationTest extends BasePostgresDeparta
 
     @Test
     void shouldRequirePagingParametersOnList() throws Exception {
-        mockMvc.perform(get("/api/departamentos")
+        mockMvc.perform(get("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isBadRequest());
     }

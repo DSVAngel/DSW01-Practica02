@@ -19,7 +19,7 @@ export interface EmpleadoPageResponse {
 }
 
 export class EmpleadosApiService {
-  private readonly baseUrl = "/api/empleados";
+  private readonly baseUrl = "/api/v1/empleados";
   private authHeaderValue: string | null = null;
 
   setCredentials(username: string, password: string): void {

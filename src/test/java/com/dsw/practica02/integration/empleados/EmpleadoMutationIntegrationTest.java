@@ -38,7 +38,7 @@ class EmpleadoMutationIntegrationTest extends BasePostgresIntegrationTest {
             "telefono", "999"
         ));
 
-        mockMvc.perform(post("/api/empleados")
+        mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
@@ -49,7 +49,7 @@ class EmpleadoMutationIntegrationTest extends BasePostgresIntegrationTest {
             "direccion", "Calle 4",
             "telefono", "111"
         ));
-        String etag = mockMvc.perform(get("/api/empleados/{clave}", "EMPINT003")
+        String etag = mockMvc.perform(get("/api/v1/empleados/{clave}", "EMPINT003")
             .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
             .andExpect(header().exists("ETag"))
@@ -57,7 +57,7 @@ class EmpleadoMutationIntegrationTest extends BasePostgresIntegrationTest {
             .getResponse()
             .getHeader("ETag");
 
-        mockMvc.perform(put("/api/empleados/{clave}", "EMPINT003")
+        mockMvc.perform(put("/api/v1/empleados/{clave}", "EMPINT003")
                 .with(httpBasic("admin", "admin123"))
             .header("If-Match", etag)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -68,20 +68,20 @@ class EmpleadoMutationIntegrationTest extends BasePostgresIntegrationTest {
             "direccion", "Calle 5"
         ));
 
-        mockMvc.perform(patch("/api/empleados/{clave}", "EMPINT003")
+        mockMvc.perform(patch("/api/v1/empleados/{clave}", "EMPINT003")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchBody))
             .andExpect(status().isPreconditionRequired());
 
-        mockMvc.perform(patch("/api/empleados/{clave}", "EMPINT003")
+        mockMvc.perform(patch("/api/v1/empleados/{clave}", "EMPINT003")
                 .with(httpBasic("admin", "admin123"))
                 .header("If-Match", etag)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchBody))
             .andExpect(status().isPreconditionFailed());
 
-        String currentEtag = mockMvc.perform(get("/api/empleados/{clave}", "EMPINT003")
+        String currentEtag = mockMvc.perform(get("/api/v1/empleados/{clave}", "EMPINT003")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
             .andExpect(header().exists("ETag"))
@@ -89,14 +89,14 @@ class EmpleadoMutationIntegrationTest extends BasePostgresIntegrationTest {
             .getResponse()
             .getHeader("ETag");
 
-        mockMvc.perform(patch("/api/empleados/{clave}", "EMPINT003")
+        mockMvc.perform(patch("/api/v1/empleados/{clave}", "EMPINT003")
                 .with(httpBasic("admin", "admin123"))
                 .header("If-Match", currentEtag)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchBody))
             .andExpect(status().isOk());
 
-        mockMvc.perform(delete("/api/empleados/{clave}", "EMPINT003")
+        mockMvc.perform(delete("/api/v1/empleados/{clave}", "EMPINT003")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isNoContent());
     }

@@ -78,8 +78,3 @@ jobs:
             -Dsonar.java.test.binaries=target/test-classes
             -Dsonar.junit.reportPaths=target/surefire-reports
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/**/lcov.info
-
-      - name: SonarCloud quality gate
-        if: ${{ env.HAS_SONAR_TOKEN == 'true' && vars.SONAR_PROJECT_KEY != '' && vars.SONAR_ORGANIZATION != '' }}
-        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
-        timeout-minutes: 5

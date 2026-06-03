@@ -35,7 +35,7 @@ class DepartamentoSecurityIntegrationTest extends BasePostgresDepartamentoIntegr
             "telefono", "333"
         ));
 
-        mockMvc.perform(post("/api/empleados")
+        mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(empleadoBody))
@@ -47,12 +47,12 @@ class DepartamentoSecurityIntegrationTest extends BasePostgresDepartamentoIntegr
             "descripcion", "Normativo"
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
             .andExpect(status().isUnauthorized());
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createBody))
@@ -62,12 +62,12 @@ class DepartamentoSecurityIntegrationTest extends BasePostgresDepartamentoIntegr
             "empleadosClaves", List.of("EMPSEC001")
         ));
 
-        mockMvc.perform(patch("/api/departamentos/{clave}", "DEPSEC001")
+        mockMvc.perform(patch("/api/v1/departamentos/{clave}", "DEPSEC001")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchBody))
             .andExpect(status().isUnauthorized());
 
-        mockMvc.perform(patch("/api/departamentos/{clave}", "DEPSEC001")
+        mockMvc.perform(patch("/api/v1/departamentos/{clave}", "DEPSEC001")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchBody))
