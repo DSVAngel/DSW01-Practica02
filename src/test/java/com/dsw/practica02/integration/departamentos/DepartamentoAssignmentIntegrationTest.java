@@ -37,7 +37,7 @@ class DepartamentoAssignmentIntegrationTest extends BasePostgresDepartamentoInte
             "telefono", "222"
         ));
 
-        mockMvc.perform(post("/api/empleados")
+        mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(empleadoBody))
@@ -54,13 +54,13 @@ class DepartamentoAssignmentIntegrationTest extends BasePostgresDepartamentoInte
             "descripcion", "Software"
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(depA))
             .andExpect(status().isCreated());
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(depB))
@@ -69,7 +69,7 @@ class DepartamentoAssignmentIntegrationTest extends BasePostgresDepartamentoInte
         String patchA = objectMapper.writeValueAsString(Map.of(
             "empleadosClaves", List.of("EMPREA001")
         ));
-        mockMvc.perform(patch("/api/departamentos/{clave}", "DEPREA001")
+        mockMvc.perform(patch("/api/v1/departamentos/{clave}", "DEPREA001")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchA))
@@ -78,13 +78,13 @@ class DepartamentoAssignmentIntegrationTest extends BasePostgresDepartamentoInte
         String patchB = objectMapper.writeValueAsString(Map.of(
             "empleadosClaves", List.of("EMPREA001")
         ));
-        mockMvc.perform(patch("/api/departamentos/{clave}", "DEPREA002")
+        mockMvc.perform(patch("/api/v1/departamentos/{clave}", "DEPREA002")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchB))
             .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/empleados/{clave}", "EMPREA001")
+        mockMvc.perform(get("/api/v1/empleados/{clave}", "EMPREA001")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.departamento.clave").value("DEPREA002"));

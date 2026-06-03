@@ -35,18 +35,18 @@ class EmpleadoQueryIntegrationTest extends BasePostgresIntegrationTest {
             "telefono", "777"
         ));
 
-        mockMvc.perform(post("/api/empleados")
+        mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
             .andExpect(status().isCreated());
 
-        mockMvc.perform(get("/api/empleados/{clave}", "EMPINT002")
+        mockMvc.perform(get("/api/v1/empleados/{clave}", "EMPINT002")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.clave").value("EMPINT002"));
 
-        mockMvc.perform(get("/api/empleados")
+        mockMvc.perform(get("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .param("page", "0")
                 .param("size", "10"))

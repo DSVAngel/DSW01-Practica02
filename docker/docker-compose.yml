@@ -15,16 +15,16 @@ services:
       timeout: 5s
       retries: 5
 
+
+
   back:
     build:
       context: ..
       dockerfile: Dockerfile
     environment:
       SERVER_PORT: 8080
-      DB_HOST: bd
-      DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-dswdb}
-      DB_USER: ${DB_USER:-postgres}
+      DB_URL: ${DB_URL:-jdbc:postgresql://bd:5432/${DB_NAME:-dswdb}?sslmode=disable}
+      DB_USERNAME: ${DB_USERNAME:-${DB_USER:-postgres}}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       APP_BASIC_USER: ${APP_BASIC_USER:-admin}
       APP_BASIC_PASSWORD: ${APP_BASIC_PASSWORD:-admin123}

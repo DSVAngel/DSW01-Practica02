@@ -8,6 +8,7 @@ export interface Departamento {
   nombre: string;
   descripcion: string;
   empleados: EmpleadoResumen[];
+  version?: number;
 }
 
 export interface DepartamentoPageResponse {
@@ -19,7 +20,7 @@ export interface DepartamentoPageResponse {
 }
 
 export class DepartamentosApiService {
-  private readonly baseUrl = "/api/departamentos";
+  private readonly baseUrl = "/api/v1/departamentos";
   private authHeaderValue: string | null = null;
 
   setCredentials(username: string, password: string): void {

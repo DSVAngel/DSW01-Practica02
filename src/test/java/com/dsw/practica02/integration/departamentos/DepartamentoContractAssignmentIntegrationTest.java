@@ -36,7 +36,7 @@ class DepartamentoContractAssignmentIntegrationTest extends BasePostgresDepartam
             "telefono", "111"
         ));
 
-        mockMvc.perform(post("/api/empleados")
+        mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(empleadoBody))
@@ -49,7 +49,7 @@ class DepartamentoContractAssignmentIntegrationTest extends BasePostgresDepartam
             "empleadosClaves", List.of("EMPASG001")
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(departamentoBody))
@@ -65,7 +65,7 @@ class DepartamentoContractAssignmentIntegrationTest extends BasePostgresDepartam
             "descripcion", "Ops"
         ));
 
-        mockMvc.perform(post("/api/departamentos")
+        mockMvc.perform(post("/api/v1/departamentos")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(departamentoBody))
@@ -75,7 +75,7 @@ class DepartamentoContractAssignmentIntegrationTest extends BasePostgresDepartam
             "empleadosClaves", List.of("EMP_NO_EXISTE")
         ));
 
-        mockMvc.perform(patch("/api/departamentos/{clave}", "DEPASG002")
+        mockMvc.perform(patch("/api/v1/departamentos/{clave}", "DEPASG002")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchBody))

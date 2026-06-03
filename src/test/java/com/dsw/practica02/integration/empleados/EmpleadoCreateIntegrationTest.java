@@ -34,7 +34,7 @@ class EmpleadoCreateIntegrationTest extends BasePostgresIntegrationTest {
             "telefono", "555"
         ));
 
-        mockMvc.perform(post("/api/empleados")
+        mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))

@@ -1,0 +1,9 @@
+<settings>
+  <servers>
+    <server>
+      <id>nexus-local</id> <!-- Coincide exactamente con el ID del pom.xml -->
+      <username>admin</username>
+      <password>takitol1986</password>
+    </server>
+  </servers>
+</settings>

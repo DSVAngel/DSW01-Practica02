@@ -7,20 +7,24 @@
     "start": "ng serve --host 0.0.0.0 --port 4200 --proxy-config proxy.conf.json",
     "serve": "npm run start",
     "test": "CHROME_BIN=$(node -e \"process.stdout.write(require('puppeteer').executablePath())\") ng test --watch=false --browsers=ChromeHeadlessNoSandbox",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
     "build": "ng build",
     "lint": "echo \"Frontend lint scaffolded\""
   },
   "dependencies": {
-    "@angular/compiler": "^21.0.0",
-    "@angular/platform-browser": "^21.0.0",
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0",
-    "@angular/forms": "^21.0.0"
+    "@angular/common": "21.2.5",
+    "@angular/compiler": "21.2.5",
+    "@angular/core": "21.2.5",
+    "@angular/forms": "21.2.5",
+    "@angular/platform-browser": "21.2.5",
+    "@angular/router": "21.2.5"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^21.0.0",
     "@angular/cli": "^21.0.0",
     "@types/jasmine": "^5.1.4",
+    "cypress": "^13.17.0",
     "jasmine-core": "^5.1.1",
     "karma": "^6.4.2",
     "karma-chrome-launcher": "^3.2.0",
@@ -29,5 +33,9 @@
     "karma-jasmine-html-reporter": "^2.1.0",
     "puppeteer": "^24.10.0",
     "typescript": "^5.9.0"
+  },
+  "overrides": {
+    "rimraf": "^4.4.1",
+    "glob": "^10.3.10"
   }
 }
